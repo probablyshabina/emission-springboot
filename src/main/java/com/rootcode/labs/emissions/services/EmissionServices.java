@@ -4,6 +4,7 @@ import com.rootcode.labs.emissions.Excceptions.RecordIsNotAfter2007;
 import com.rootcode.labs.emissions.models.Emission;
 
 import java.util.Date;
+import java.util.List;
 
 public class EmissionServices {
 

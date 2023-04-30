@@ -4,6 +4,7 @@ import com.rootcode.labs.emissions.Excceptions.FileNotFound;
 import com.rootcode.labs.emissions.Excceptions.RecordIsNotAfter2007;
 import com.rootcode.labs.emissions.helpers.CSVReader;
 import com.rootcode.labs.emissions.models.Emission;
+import com.rootcode.labs.emissions.models.TotalEmissions;
 import com.rootcode.labs.emissions.repositories.EmissionRepository;
 import com.rootcode.labs.emissions.services.EmissionServices;
 import com.rootcode.labs.emissions.utils.Response;
@@ -25,7 +26,6 @@ public class EmissionController {
 
     @Autowired
     EmissionRepository emissionRepository;
-
     EmissionServices emissionServices = new EmissionServices();
     Logger logger  = LoggerFactory.getLogger(EmissionController.class);
 
@@ -34,6 +34,8 @@ public class EmissionController {
         logger.info("Landed on Index page");
         return "index";
     }
+
+    //Endpoint to get All the records of emission table
     @GetMapping
     public Response getAllEmissionRecords(){
         List<Emission> emissions = (List<Emission>) emissionRepository.findAll();
@@ -59,6 +61,7 @@ public class EmissionController {
         }
     }
 
+    //Endpoint to create one emission record into emission table
     @PostMapping
     public Response createEmissionRecord(@RequestBody Emission emission){
         try{
@@ -87,6 +90,7 @@ public class EmissionController {
         }
     }
 
+    //Endpoint to upload the csv file to read and save the record to the database
     @PostMapping("/upload")
     public Response uploadCSVToDB(@RequestParam("file") MultipartFile file) throws FileNotFound {
         try{
@@ -121,6 +125,81 @@ public class EmissionController {
                     HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
                     ex.getMessage(),
                     new ArrayList<Emission>()
+            );
+        }
+    }
+
+    //Endpoint to get the sector which has emitted any gas more than 500 Tonnes
+    @GetMapping("/summary")
+    public Response getSectorsTotalEmission(@RequestParam("year") int year){
+        try{
+            List<TotalEmissions> emissions = emissionRepository.emissionGreaterThan500(year);
+
+            if(emissions.size() > 0){
+                logger.info("Sectors which has emitted more than 500 Tonnes of any gas in the year " + year + " fetched");
+                return new Response(
+                        true,
+                        HttpStatus.FOUND,
+                        HttpStatusCode.valueOf(HttpStatus.FOUND.value()),
+                        "Sectors which has emitted more than 500 Tonnes of any gas in the year " + year + " fetched",
+                        emissions
+                );
+            }
+            else {
+                logger.error("Empty Result Set");
+                return new Response(
+                        false,
+                        HttpStatus.NOT_FOUND,
+                        HttpStatusCode.valueOf(HttpStatus.NOT_FOUND.value()),
+                        "Empty Result Set",
+                        emissions
+                );
+            }
+        } catch (Exception ex){
+            logger.error(ex.getMessage());
+            return new Response(
+                    false,
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                    ex.getMessage(),
+                    new ArrayList<>()
+            );
+        }
+    }
+
+    @GetMapping("/max-emission")
+    public Response getMaximumEmittedSector(@RequestParam("year") int year){
+        try{
+            List<TotalEmissions> emissions = emissionRepository.maximumEmittedSector(year);
+
+            if(emissions.size() > 0){
+                logger.info("Sectors which has emitted more than 500 Tonnes of any gas in the year " + year + " fetched");
+                return new Response(
+                        true,
+                        HttpStatus.FOUND,
+                        HttpStatusCode.valueOf(HttpStatus.FOUND.value()),
+                        "Sectors which has emitted more than 500 Tonnes of any gas in the year " + year + " fetched",
+                        emissions
+                );
+            }
+            else{
+                logger.error("Empty Result Set");
+                return new Response(
+                        false,
+                        HttpStatus.NOT_FOUND,
+                        HttpStatusCode.valueOf(HttpStatus.NOT_FOUND.value()),
+                        "Empty results set ",
+                        emissions
+                );
+            }
+        } catch (Exception ex){
+            logger.error(ex.getMessage());
+            return new Response(
+                    false,
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+                    ex.getMessage(),
+                    new ArrayList<>()
             );
         }
     }
