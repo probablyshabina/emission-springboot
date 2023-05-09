@@ -25,15 +25,10 @@ import java.util.List;
 public class EmissionController {
 
     @Autowired
+    public
     EmissionRepository emissionRepository;
-    EmissionServices emissionServices = new EmissionServices();
-    Logger logger  = LoggerFactory.getLogger(EmissionController.class);
-
-    @GetMapping("/")
-    public String returnIndex(){
-        logger.info("Landed on Index page");
-        return "index";
-    }
+    public EmissionServices emissionServices = new EmissionServices();
+    public Logger logger  = LoggerFactory.getLogger(EmissionController.class);
 
     //Endpoint to get All the records of emission table
     @GetMapping
@@ -65,8 +60,7 @@ public class EmissionController {
     @PostMapping
     public Response createEmissionRecord(@RequestBody Emission emission){
         try{
-            Emission validatedRecord = emissionServices.isRecordAcceptable(emission);
-            Emission createdRecord = emissionRepository.save(emission);
+            Emission createdRecord = emissionServices.isRecordAcceptable(emission);
             List<Emission> responseList = new ArrayList<>();
             responseList.add(createdRecord);
 
@@ -92,7 +86,7 @@ public class EmissionController {
 
     //Endpoint to upload the csv file to read and save the record to the database
     @PostMapping("/upload")
-    public Response uploadCSVToDB(@RequestParam("file") MultipartFile file) throws FileNotFound {
+    public Response uploadCSVToDB(@RequestParam("file") MultipartFile file) {
         try{
             List<Emission> emissionRecordsFromCSV = CSVReader.readCSVFile(file);
             List<Emission> emissionRecords = (List<Emission>) emissionRepository.saveAll(emissionRecordsFromCSV);
@@ -173,12 +167,12 @@ public class EmissionController {
             List<TotalEmissions> emissions = emissionRepository.maximumEmittedSector(year);
 
             if(emissions.size() > 0){
-                logger.info("Sectors which has emitted more than 500 Tonnes of any gas in the year " + year + " fetched");
+                logger.info("Sector with maximum greenhouse gas emission in the year" + year + " fetched");
                 return new Response(
                         true,
                         HttpStatus.FOUND,
                         HttpStatusCode.valueOf(HttpStatus.FOUND.value()),
-                        "Sectors which has emitted more than 500 Tonnes of any gas in the year " + year + " fetched",
+                        "Sector with maximum greenhouse gas emission in the year " + year + " fetched",
                         emissions
                 );
             }
