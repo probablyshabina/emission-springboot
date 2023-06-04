@@ -5,3 +5,5 @@ Backend of this project is completed with springboot jpa and can be run on local
 
 CSV which is used to retrive the information can be found inside ./data folder. 
 Complete API Documentation can be found here https://documenter.getpostman.com/view/14855218/2s93eSZvep
+
+This is a submission repository of the assesment I faced during the interview process of Rootcode Internship
